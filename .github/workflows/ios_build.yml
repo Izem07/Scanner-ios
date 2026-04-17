@@ -21,6 +21,9 @@ jobs:
 
       - run: flutter pub get
 
+      - name: Generate iOS app icons
+        run: flutter pub run flutter_launcher_icons
+
       - run: pod repo update
         working-directory: ios
 

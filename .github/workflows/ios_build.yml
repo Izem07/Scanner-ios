@@ -20,9 +20,6 @@ jobs:
       - name: Install Dart dependencies
         run: flutter pub get
 
-      - name: Regenerate iOS project with valid Xcode structure
-        run: flutter create --platforms=ios . --project-name scout_ops_scan
-
       - name: Set iOS deployment target in Podfile
         run: |
           sed -i '' "s/platform :ios, '[0-9][0-9.]*'/platform :ios, '13.0'/" ios/Podfile

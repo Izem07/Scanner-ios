@@ -1,0 +1,61 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_ios:
+    name: Build Flutter iOS App
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install Dart dependencies
+        run: flutter pub get
+
+      - name: Set iOS deployment target in Podfile
+        run: |
+          sed -i '' "s/platform :ios, '[0-9][0-9.]*'/platform :ios, '13.0'/" ios/Podfile
+
+      - name: Ensure camera permissions in Info.plist
+        run: |
+          /usr/libexec/PlistBuddy -c \
+            "Add :NSCameraUsageDescription string 'This app requires access to the camera to scan QR codes and barcodes for Scout Ops.'" \
+            ios/Runner/Info.plist 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c \
+            "Set :NSCameraUsageDescription 'This app requires access to the camera to scan QR codes and barcodes for Scout Ops.'" \
+            ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c \
+            "Add :NSPhotoLibraryUsageDescription string 'This app requires access to the photo library to select barcode images.'" \
+            ios/Runner/Info.plist 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c \
+            "Set :NSPhotoLibraryUsageDescription 'This app requires access to the photo library to select barcode images.'" \
+            ios/Runner/Info.plist
+
+      - name: Install CocoaPods dependencies
+        run: pod install
+        working-directory: ios
+
+      - name: Build iOS App (Unsigned)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package into IPA
+        run: |
+          cd build/ios/iphoneos
+          mkdir Payload
+          cp -r Runner.app Payload/
+          zip -r app.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: build/ios/iphoneos/app.ipa
+          retention-days: 7

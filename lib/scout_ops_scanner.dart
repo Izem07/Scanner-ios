@@ -388,15 +388,9 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner>
               icon: data.isCharging
                   ? Icons.battery_charging_full_rounded
                   : _getBatteryIcon(data.moduleBattery),
-              iconColor: data.isCharging
-                  ? const Color(0xFF00E676)
-                  : _getBatteryColor(data.moduleBattery),
-              text: data.isCharging
-                  ? 'Charging'
-                  : '${data.moduleBattery}%',
-              textColor: data.isCharging
-                  ? const Color(0xFF00E676)
-                  : _getBatteryColor(data.moduleBattery),
+              iconColor: const Color(0xFF00E676),
+              text: '${data.moduleBattery}%',
+              textColor: const Color(0xFF00E676),
             ),
 
             const SizedBox(width: 8),

@@ -1,0 +1,48 @@
+name: Scouting — Android Build
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scouting/**'
+
+jobs:
+  build-android:
+    name: Android APK Build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    defaults:
+      run:
+        working-directory: scouting
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - run: flutter pub get
+
+      - name: Generate Android app icons
+        run: flutter pub run flutter_launcher_icons
+
+      - run: flutter build apk --release
+
+      - name: Upload to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: "scouting/build/app/outputs/flutter-apk/app-release.apk"
+          asset_name: "ScoutOps Scanner v1.3.3.apk"
+          tag: scouting-android-v1.3.3
+          overwrite: true
+          body: "ScoutOps Scanner Android v1.3.3"
